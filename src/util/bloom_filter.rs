@@ -40,7 +40,7 @@ impl BloomFilter {
         let ln2 = 2_f64.ln();
         let size = (-1_f64 / ln2.powf(2_f64) * insert * pr_false_pos.ln()) / 8_f64;
         let size = size.min(BLOOM_FILTER_MAX_FILTER_SIZE as f64);
-        let num_hash_funcs = (size as f64) * 8_f64 / insert * ln2;
+        let num_hash_funcs = size * 8_f64 / insert * ln2;
         let num_hash_funcs = num_hash_funcs.min(BLOOM_FILTER_MAX_HASH_FUNCS as f64);
         let size = size.ceil() as usize;
         let num_hash_funcs = num_hash_funcs.ceil() as usize;
@@ -58,7 +58,7 @@ impl BloomFilter {
 
     /// Adds data to the bloom filter
     pub fn add(&mut self, data: &[u8]) {
-        debug!("Adding to bloom filter: {:?}", hex::encode(&data));
+        debug!("Adding to bloom filter: {:?}", hex::encode(data));
         for i in 0..self.num_hash_funcs {
             let seed = Wrapping(i as u32) * Wrapping(0xFBA4C795) + Wrapping(self.tweak);
             let c = murmur3_32(&mut Cursor::new(&data), seed.0) % (self.filter.len() as u32 * 8);
@@ -100,7 +100,7 @@ impl Serializable<BloomFilter> for BloomFilter {
             num_hash_funcs: 0,
             tweak: 0,
         };
-        reader.read(&mut bloom_filter.filter)?;
+        reader.read_exact(&mut bloom_filter.filter)?;
         bloom_filter.num_hash_funcs = reader.read_u64::<LittleEndian>()? as usize;
         bloom_filter.tweak = reader.read_u32::<LittleEndian>()?;
         Ok(bloom_filter)
@@ -108,7 +108,7 @@ impl Serializable<BloomFilter> for BloomFilter {
 
     fn write(&self, writer: &mut dyn Write) -> io::Result<()> {
         var_int::write(self.filter.len() as u64, writer)?;
-        writer.write(&self.filter)?;
+        writer.write_all(&self.filter)?;
         writer.write_u64::<LittleEndian>(self.num_hash_funcs as u64)?;
         writer.write_u32::<LittleEndian>(self.tweak)?;
         Ok(())
@@ -134,7 +134,7 @@ mod tests {
     fn write_read() {
         let mut bf = BloomFilter::new(20000., 0.001).unwrap();
         for i in 0..5 {
-            bf.add(&vec![i; 32]);
+            bf.add(&[i; 32]);
         }
         let mut v = Vec::new();
         bf.write(&mut v).unwrap();
@@ -144,9 +144,9 @@ mod tests {
     #[test]
     fn contains() {
         let mut bf = BloomFilter::new(20000., 0.001).unwrap();
-        bf.add(&vec![5; 32]);
-        assert!(bf.contains(&vec![5; 32]));
-        assert!(!bf.contains(&vec![6; 32]));
+        bf.add(&[5; 32]);
+        assert!(bf.contains(&[5; 32]));
+        assert!(!bf.contains(&[6; 32]));
     }
 
     #[test]
