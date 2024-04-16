@@ -1,4 +1,6 @@
 # nChain Rust-SV
+![Test Status](https://gist.githubusercontent.com/Danconnolly/ba7b66a3f55b19ca69abe8b8b537ae56/raw/badge.svg)
+[![dependency status](https://deps.rs/repo/github/nchain-research/rust-sv/status.svg)](https://deps.rs/repo/github/nchain-research/rust-sv)
 
 This is the nChain fork of the rust-sv library. The original library can be found at 
 [https://github.com/brentongunning/rust-sv].  
