@@ -6,7 +6,9 @@ This is the nChain fork of the rust-sv library. The original library can be foun
 [https://github.com/brentongunning/rust-sv].  
 
 We've created this repository because the original source doesn't appear to be updated anymore. This repository
-contains some critical updates. We will feed updates here back to the original repository as pull-requests.
+contains some critical updates. We will feed updates here back to the original repository as pull-requests. The
+purpose is to maintain the rust-sv library, not to extend it. Fixes should be limited to those that are necessary
+to keep the library working with the latest versions of Rust and its dependencies.
 
 The nChain version is available in the `nchain` branch. The `master` branch is the original version.
 
@@ -15,6 +17,8 @@ To use this version in your project, use a line such as the following in your `C
 ```toml
 sv = { git = "https://github.com/nchain-research/rust-sv.git", branch = "nchain" }
 ```
+
+nChain versions are tagged with a version number preceded by `n`, for example `n0.2.3`.
 
 # Original Text
 
