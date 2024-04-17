@@ -67,13 +67,13 @@ impl Script {
             }
             256..=65535 => {
                 self.0.push(op_codes::OP_PUSHDATA2);
-                self.0.push((len >> 0) as u8);
+                self.0.push(len as u8);
                 self.0.push((len >> 8) as u8);
                 self.0.extend_from_slice(data);
             }
             _ => {
                 self.0.push(op_codes::OP_PUSHDATA4);
-                self.0.push((len >> 0) as u8);
+                self.0.push(len as u8);
                 self.0.push((len >> 8) as u8);
                 self.0.push((len >> 16) as u8);
                 self.0.push((len >> 24) as u8);
@@ -101,10 +101,10 @@ impl fmt::Debug for Script {
         let script = &self.0;
         let mut ret = String::new();
         let mut i = 0;
-        ret.push_str("[");
+        ret.push('[');
         while i < script.len() {
             if i != 0 {
-                ret.push_str(" ")
+                ret.push(' ')
             }
             match script[i] {
                 OP_0 => ret.push_str("OP_0"),
@@ -150,7 +150,7 @@ impl fmt::Debug for Script {
                 OP_PUSHDATA2 => {
                     ret.push_str("OP_PUSHDATA2 ");
                     if i + 3 <= script.len() {
-                        let len = ((script[i + 1] as usize) << 0) + ((script[i + 2] as usize) << 8);
+                        let len = (script[i + 1] as usize) + ((script[i + 2] as usize) << 8);
                         ret.push_str(&format!("{} ", len));
                         if i + 3 + len <= script.len() {
                             ret.push_str(&hex::encode(&script[i + 3..i + 3 + len]));
@@ -164,7 +164,7 @@ impl fmt::Debug for Script {
                 OP_PUSHDATA4 => {
                     ret.push_str("OP_PUSHDATA4 ");
                     if i + 5 <= script.len() {
-                        let len = ((script[i + 1] as usize) << 0)
+                        let len = (script[i + 1] as usize)
                             + ((script[i + 2] as usize) << 8)
                             + ((script[i + 3] as usize) << 16)
                             + ((script[i + 4] as usize) << 24);
@@ -259,7 +259,7 @@ impl fmt::Debug for Script {
                 ret.push_str(&format!(" {}", script[j]));
             }
         }
-        ret.push_str("]");
+        ret.push(']');
         f.write_str(&ret)
     }
 }
@@ -272,19 +272,19 @@ mod tests {
     #[test]
     fn append_data() {
         let mut s = Script::new();
-        s.append_data(&vec![]);
+        s.append_data(&[]);
         assert!(s.0.len() == 1);
 
         let mut s = Script::new();
-        s.append_data(&vec![0; 1]);
+        s.append_data(&[0; 1]);
         assert!(s.0[0] == OP_PUSH + 1 && s.0.len() == 2);
 
         let mut s = Script::new();
-        s.append_data(&vec![0; 75]);
+        s.append_data(&[0; 75]);
         assert!(s.0[0] == OP_PUSH + 75 && s.0.len() == 76);
 
         let mut s = Script::new();
-        s.append_data(&vec![0; 76]);
+        s.append_data(&[0; 76]);
         assert!(s.0[0] == OP_PUSHDATA1 && s.0[1] == 76 && s.0.len() == 78);
 
         let mut s = Script::new();

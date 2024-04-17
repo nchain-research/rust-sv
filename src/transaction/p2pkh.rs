@@ -35,19 +35,19 @@ pub fn check_lock_script(lock_script: &[u8]) -> bool {
 
 /// Returns whether the unlock_script is p2pkh
 pub fn check_unlock_script(unlock_script: &[u8]) -> bool {
-    if unlock_script.len() == 0
+    if unlock_script.is_empty()
         || unlock_script[0] < OP_PUSH + 71
         || unlock_script[0] > OP_PUSH + 73
     {
         return false;
     }
-    let i = next_op(0, &unlock_script);
+    let i = next_op(0, unlock_script);
     if i >= unlock_script.len()
         || unlock_script[i] != OP_PUSH + 33 && unlock_script[i] != OP_PUSH + 65
     {
         return false;
     }
-    next_op(i, &unlock_script) >= unlock_script.len()
+    next_op(i, unlock_script) >= unlock_script.len()
 }
 
 /// Returns whether the lock_script is a P2PKH send to the provided address
@@ -60,7 +60,7 @@ pub fn check_unlock_script_addr(pubkey: &[u8], unlock_script: &[u8]) -> bool {
     if !check_unlock_script(unlock_script) {
         return false;
     }
-    let i = next_op(0, &unlock_script);
+    let i = next_op(0, unlock_script);
     unlock_script[i + 1..] == *pubkey
 }
 
@@ -70,7 +70,7 @@ pub fn extract_pubkey(unlock_script: &[u8]) -> Result<Vec<u8>> {
         let msg = "Script is not a sigscript for P2PKH".to_string();
         return Err(Error::BadData(msg));
     }
-    let i = next_op(0, &unlock_script);
+    let i = next_op(0, unlock_script);
     Ok(unlock_script[i + 1..].to_vec())
 }
 

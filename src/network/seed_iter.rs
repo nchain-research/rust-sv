@@ -36,7 +36,7 @@ impl Iterator for SeedIter {
                 return None;
             }
 
-            if self.nodes.len() == 0 {
+            if self.nodes.is_empty() {
                 let i = (self.seed_index + self.random_offset) % self.seeds.len();
                 info!("Looking up DNS {:?}", self.seeds[i]);
                 match lookup_host(&self.seeds[i]) {

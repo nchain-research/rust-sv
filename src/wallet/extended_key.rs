@@ -122,7 +122,7 @@ impl ExtendedKey {
         ((self.0[0] as u32) << 24)
             | ((self.0[1] as u32) << 16)
             | ((self.0[2] as u32) << 8)
-            | ((self.0[3] as u32) << 0)
+            | (self.0[3] as u32)
     }
 
     /// Gets the network
@@ -166,7 +166,7 @@ impl ExtendedKey {
         ((self.0[9] as u32) << 24)
             | ((self.0[10] as u32) << 16)
             | ((self.0[11] as u32) << 8)
-            | ((self.0[12] as u32) << 0)
+            | (self.0[12] as u32)
     }
 
     /// Gets the chain code
@@ -216,11 +216,11 @@ impl ExtendedKey {
     /// Gets the extenced public key for this key
     pub fn extended_public_key(&self) -> Result<ExtendedKey> {
         match self.key_type()? {
-            ExtendedKeyType::Public => Ok(self.clone()),
+            ExtendedKeyType::Public => Ok(*self),
             ExtendedKeyType::Private => {
                 let private_key = &self.0[46..];
                 let secp = Secp256k1::signing_only();
-                let secp_secret_key = SecretKey::from_slice(&private_key)?;
+                let secp_secret_key = SecretKey::from_slice(private_key)?;
                 let secp_public_key = PublicKey::from_secret_key(&secp, &secp_secret_key);
                 let public_key = secp_public_key.serialize();
 
@@ -250,7 +250,7 @@ impl ExtendedKey {
 
         let secp = Secp256k1::signing_only();
         let private_key = &self.0[46..];
-        let secp_par_secret_key = SecretKey::from_slice(&private_key)?;
+        let secp_par_secret_key = SecretKey::from_slice(private_key)?;
         let chain_code = &self.0[13..45];
         //let key = hmac::SigningKey::new(&SHA512, chain_code);
         let key = hmac::Key::new(hmac::HMAC_SHA512, chain_code);
@@ -258,7 +258,7 @@ impl ExtendedKey {
         let hmac = if index >= HARDENED_KEY {
             let mut v = Vec::<u8>::with_capacity(37);
             v.push(0);
-            v.extend_from_slice(&private_key);
+            v.extend_from_slice(private_key);
             v.write_u32::<BigEndian>(index)?;
             hmac::sign(&key, &v)
         } else {
@@ -280,7 +280,7 @@ impl ExtendedKey {
         }
 
         let mut secp_child_secret_key = SecretKey::from_slice(&hmac.as_ref()[..32])?;
-        secp_child_secret_key.add_assign(&private_key)?;
+        secp_child_secret_key.add_assign(private_key)?;
 
         let child_chain_code = &hmac.as_ref()[32..];
         let fingerprint = self.fingerprint()?;
@@ -411,19 +411,19 @@ pub fn derive_extended_key(master: &ExtendedKey, path: &str) -> Result<ExtendedK
         return Err(Error::BadArgument(msg.to_string()));
     }
 
-    let mut key = master.clone();
+    let mut key = *master;
 
     for part in parts[1..].iter() {
-        if part.len() == 0 {
+        if part.is_empty() {
             let msg = "Empty part";
             return Err(Error::BadArgument(msg.to_string()));
         }
 
-        let index = if part.ends_with("'") || part.ends_with("h") || part.ends_with("H") {
+        let index = if part.ends_with('\'') || part.ends_with('h') || part.ends_with('H') {
             let index: u32 = part
-                .trim_end_matches("'")
-                .trim_end_matches("h")
-                .trim_end_matches("H")
+                .trim_end_matches('\'')
+                .trim_end_matches('h')
+                .trim_end_matches('H')
                 .parse()?;
             if index >= HARDENED_KEY {
                 let msg = "Key index is already hardened";
@@ -474,8 +474,8 @@ mod tests {
     #[test]
     fn private_key_range() {
         // Valid
-        let mut max = SECP256K1_CURVE_ORDER.clone();
-        max[31] = max[31] - 1;
+        let mut max = SECP256K1_CURVE_ORDER;
+        max[31] -= 1;
         assert!(is_private_key_valid(&max));
         assert!(is_private_key_valid(&[0x01; 32]));
 
@@ -677,7 +677,7 @@ mod tests {
         let seed = hex::decode(seed).unwrap();
         let key = "Bitcoin seed".to_string();
         //let key = hmac::SigningKey::new(&SHA512, &key.as_bytes());
-        let key = hmac::Key::new(hmac::HMAC_SHA512, &key.as_bytes());
+        let key = hmac::Key::new(hmac::HMAC_SHA512, key.as_bytes());
         let hmac = hmac::sign(&key, &seed);
         ExtendedKey::new_private_key(
             Network::Mainnet,

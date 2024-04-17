@@ -33,7 +33,7 @@ impl MerkleBlock {
         let mut matches = Vec::new();
         let tree_depth = (self.total_transactions as f32).log(2.).ceil() as usize;
         let mut row_len = self.total_transactions as usize;
-        let mut total_nodes = row_len as usize;
+        let mut total_nodes = row_len;
         while row_len > 1 {
             row_len = (row_len + 1) / 2;
             total_nodes += row_len;
@@ -86,7 +86,7 @@ impl MerkleBlock {
         } else if depth == tree_depth {
             *preorder_node += 1;
             let hash = self.consume_hash(hashes_used)?;
-            matches.push(hash.clone());
+            matches.push(hash);
             Ok(hash)
         } else {
             *preorder_node += 1;
@@ -130,7 +130,7 @@ impl MerkleBlock {
         if *flag_bits_used / 8 >= self.flags.len() {
             return Err(Error::BadData("Not enough flag bits".to_string()));
         }
-        let flag = (self.flags[*flag_bits_used / 8] >> *flag_bits_used % 8) & 1;
+        let flag = (self.flags[*flag_bits_used / 8] >> (*flag_bits_used % 8)) & 1;
         *flag_bits_used += 1;
         Ok(flag)
     }

@@ -40,6 +40,12 @@ pub struct Subject<T> {
     pending: RwLock<Vec<Weak<dyn Observer<T>>>>,
 }
 
+impl<T> Default for Subject<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<T> Subject<T> {
     /// Creates a new empty set of observers
     pub fn new() -> Subject<T> {
@@ -104,6 +110,12 @@ pub struct Single<T: Sync + Send + Clone> {
     value: RwLock<Option<T>>,
 }
 
+impl<T: Sync + Send + Clone> Default for Single<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<T: Sync + Send + Clone> Single<T> {
     /// Creates a new single with an empty set of observers
     pub fn new() -> Single<T> {
@@ -127,7 +139,7 @@ impl<T: Sync + Send + Clone> Observer<T> for Single<T> {
 impl<T: Sync + Send + Clone + 'static> Observable<T> for Single<T> {
     fn subscribe<S: Observer<T> + 'static>(&self, observer: &Arc<S>) {
         match &*self.value.read().unwrap() {
-            Some(value) => observer.next(&value),
+            Some(value) => observer.next(value),
             None => self.subject.subscribe(observer),
         }
     }

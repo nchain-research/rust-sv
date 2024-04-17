@@ -57,6 +57,12 @@ pub struct SigHashCache {
     hash_outputs: Option<Hash256>,
 }
 
+impl Default for SigHashCache {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SigHashCache {
     /// Creates a new cache
     pub fn new() -> SigHashCache {
@@ -124,7 +130,7 @@ fn bip143_sighash(
 
     // 5. Serialize input script
     var_int::write(script_code.len() as u64, &mut s)?;
-    s.write(&script_code)?;
+    s.write(script_code)?;
 
     // 6. Serialize satoshis
     s.write_i64::<LittleEndian>(satoshis)?;

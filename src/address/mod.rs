@@ -110,7 +110,7 @@ mod tests {
     #[test]
     fn from_addr() {
         let addr = "1NM2HFXin4cEQRBLjkNZAS98qLX9JKzjKn";
-        let result = addr_decode(&addr, Network::Mainnet).unwrap();
+        let result = addr_decode(addr, Network::Mainnet).unwrap();
         let hash160 = result.0;
         let addr_type = result.1;
         assert!(addr_type == AddressType::P2PKH);

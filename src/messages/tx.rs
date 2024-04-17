@@ -44,10 +44,10 @@ impl Tx {
         pregenesis_outputs: &HashSet<OutPoint>,
     ) -> Result<()> {
         // Make sure neither in or out lists are empty
-        if self.inputs.len() == 0 {
+        if self.inputs.is_empty() {
             return Err(Error::BadData("inputs empty".to_string()));
         }
-        if self.outputs.len() == 0 {
+        if self.outputs.is_empty() {
             return Err(Error::BadData("outputs empty".to_string()));
         }
 
@@ -113,7 +113,7 @@ impl Tx {
             let mut tx_checker = TransactionChecker {
                 tx: self,
                 sig_hash_cache: &mut sighash_cache,
-                input: input,
+                input,
                 satoshis: tx_out.satoshis,
                 require_sighash_forkid,
             };

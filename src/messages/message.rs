@@ -445,7 +445,7 @@ fn write_with_payload<T: Serializable<T>>(
     let mut bytes = Vec::with_capacity(payload.size());
     payload.write(&mut bytes)?;
     let hash = digest::digest(&digest::SHA256, bytes.as_ref());
-    let hash = digest::digest(&digest::SHA256, &hash.as_ref());
+    let hash = digest::digest(&digest::SHA256, hash.as_ref());
     let h = &hash.as_ref();
     let checksum = [h[0], h[1], h[2], h[3]];
 
@@ -453,7 +453,7 @@ fn write_with_payload<T: Serializable<T>>(
         magic,
         command,
         payload_size: payload.size() as u32,
-        checksum: checksum,
+        checksum,
     };
 
     header.write(writer)?;
