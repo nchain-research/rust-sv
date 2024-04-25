@@ -4,6 +4,7 @@ use std::io::Read;
 const MAX_BUFFER_SIZE_USIZE: usize = 2147483647;
 
 /// Wraps a reader so reads become all-or-nothing
+// todo: do we need this? isnt this covered by read_all?
 pub struct AtomicReader<'a> {
     buf: Vec<u8>,
     reader: &'a mut dyn Read,
