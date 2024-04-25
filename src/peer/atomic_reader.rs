@@ -30,9 +30,9 @@ impl<'a> Read for AtomicReader<'a> {
             out[0..buf_len].clone_from_slice(&self.buf[0..]);
             //let size = self.reader.read(&mut out[buf_len..])?;
             // Check the size of this read
+            #[allow(clippy::unused_io_amount)]
             let size = if (out_len - buf_len) > MAX_BUFFER_SIZE_USIZE {
-                self.reader
-                    .read(&mut out[buf_len..buf_len + MAX_BUFFER_SIZE_USIZE])?
+                self.reader.read(&mut out[buf_len..buf_len + MAX_BUFFER_SIZE_USIZE])?
             } else {
                 self.reader.read(&mut out[buf_len..])?
             };
@@ -50,6 +50,7 @@ impl<'a> Read for AtomicReader<'a> {
         } else {
             //let size = self.reader.read(&mut out[0..])?;
             // Check the size of this read
+            #[allow(clippy::unused_io_amount)]
             let size = if out_len > MAX_BUFFER_SIZE_USIZE {
                 self.reader.read(&mut out[0..MAX_BUFFER_SIZE_USIZE])?
             } else {
